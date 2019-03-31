@@ -226,8 +226,12 @@ Examples of use:
               {contents = Cons (5, {contents = Cons (6, {contents = Nil})})})})})})
 .....................................................................*)
 
-let mappend _ =
-  failwith "mappend not implemented" ;;
+let rec mappend (xs : 'a mlist) (ys : 'a mlist) : unit =
+  match xs with
+  | Nil -> ()
+  | Cons (_h, t) -> match !t with
+                    | Nil -> t := ys
+                    | Cons (_, _) as m -> mappend m ys ;;
 
 (* What happens when you evaluate the following expressions
    sequentially in order?
@@ -295,7 +299,6 @@ Exercise 9: Your job is to complete the implementation by finishing
 the to_string function. (Read on below for an example of the use of
 the functor.)
 .....................................................................*)
-
 module MakeImpQueue (A : sig
                            type t
                            val to_string : t -> string
@@ -325,7 +328,16 @@ module MakeImpQueue (A : sig
          Some h
       | Nil -> None
     let to_string q =
-      failwith "to_string not implemented"
+
+      (* our solution for defining to_string: *)
+      let rec to_string' mlst =
+        match !mlst with
+        | Nil -> "||"
+        | Cons (h, t) ->
+           Printf.sprintf "%s -> %s" (A.to_string h) (to_string' t) in
+      to_string' q.front
+      (* end of our solution *)
+
   end ;;
 
 (* To build an imperative queue, we apply the functor to an
